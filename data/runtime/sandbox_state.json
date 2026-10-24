@@ -1,0 +1,114 @@
+{
+  "last_health": {
+    "timestamp": 1792687880.203275,
+    "timestamp_iso": "2026-10-22T16:51:20+00:00",
+    "timestamp_local": "2026-10-22T22:21:20+05:30",
+    "score": 100,
+    "damage_score": 0,
+    "max_damage": 21,
+    "status": "healthy",
+    "breached_layers": [],
+    "degraded_layers": [],
+    "layers": [
+      {
+        "id": "sandbox_runtime",
+        "name": "Sandbox runtime",
+        "status": "healthy",
+        "detail": "docker backend \u00b7 port 11435 listening",
+        "recommendation": "Start or recreate the sandbox from the repair workspace.",
+        "critical": true
+      },
+      {
+        "id": "container_isolation",
+        "name": "Container isolation",
+        "status": "healthy",
+        "detail": "read-only root, caps dropped, limits active",
+        "recommendation": "Recreate the container to re-apply the isolation policy.",
+        "critical": true
+      },
+      {
+        "id": "network_scope",
+        "name": "Network scope",
+        "status": "healthy",
+        "detail": "listeners: 127.0.0.1:11435",
+        "recommendation": "Bind the model only to loopback and deny egress at the host firewall.",
+        "critical": true
+      },
+      {
+        "id": "gateway_policy",
+        "name": "Model gateway policy",
+        "status": "healthy",
+        "detail": "rate limit 1 session bucket(s) \u00b7 circuit closed",
+        "recommendation": "Reset gateway state if a stale breaker or rate bucket is blocking tests.",
+        "critical": false
+      },
+      {
+        "id": "audit_chain",
+        "name": "Audit chain",
+        "status": "healthy",
+        "detail": "SHA-256 chain intact",
+        "recommendation": "Do not edit the log in place. Preserve it for forensics and rotate it.",
+        "critical": true
+      },
+      {
+        "id": "defence_state",
+        "name": "Defence state",
+        "status": "healthy",
+        "detail": "all learned patterns compile",
+        "recommendation": "Remove invalid learned patterns or restore the defence store from backup.",
+        "critical": true
+      },
+      {
+        "id": "runtime_artifacts",
+        "name": "Runtime artifacts",
+        "status": "healthy",
+        "detail": "evidence queue: valid JSON",
+        "recommendation": "Quarantine the corrupted queue and reset it.",
+        "critical": false
+      }
+    ],
+    "sandbox": {
+      "running": true,
+      "backend": "docker",
+      "model": "llama3.2:1b",
+      "port": 11435,
+      "docker_available": true,
+      "docker_message": "Docker daemon reachable",
+      "fallback_reason": null
+    },
+    "port": {
+      "listening": true,
+      "detail": "listening",
+      "addresses": [
+        "127.0.0.1:11435"
+      ]
+    },
+    "docker": {
+      "available": true,
+      "detail": "Docker isolation flags inspected",
+      "breaches": [],
+      "host_config": {
+        "readonly": true,
+        "cap_drop": [
+          "ALL"
+        ],
+        "pids_limit": 512,
+        "memory": 6442450944,
+        "network_mode": "bridge",
+        "security_opt": [
+          "no-new-privileges"
+        ]
+      }
+    },
+    "audit_chain": {
+      "valid": true,
+      "broken_at": null
+    },
+    "defence_store": {
+      "valid": true,
+      "detail": "all learned patterns compile",
+      "invalid": []
+    }
+  },
+  "updated_at": "2026-10-22T16:51:20+00:00"
+}

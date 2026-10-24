@@ -1,0 +1,60 @@
+
+# Environments & Dependencies
+.venv/
+venv/
+node_modules/
+frontend/node_modules/
+frontend/dist/
+
+# Byte-compiled / cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.tsbuildinfo
+
+# OS metadata
+.DS_Store
+.DS_Store?
+._*
+__MACOSX/
+
+# Local databases and runtime locks
+*.lock
+data/logs/*.db
+data/logs/*.log
+
+# Environments & Dependencies
+.venv/
+venv/
+node_modules/
+frontend/node_modules/
+frontend/dist/
+
+# Byte-compiled / cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.tsbuildinfo
+
+# OS metadata
+.DS_Store
+.DS_Store?
+._*
+__MACOSX/
+
+# Local databases and runtime locks
+*.lock
+data/logs/*.db
+data/logs/*.log
+.venv/
+venv/
+_pycache_/
+*.pyc
+.DS_Store
+frontend/node_modules/
+frontend/dist/
+data/runtime/quarantine/*
+data/runtime/evaluation_runs/*
+data/logs/*.log
+data/logs/*.db
+*.lock

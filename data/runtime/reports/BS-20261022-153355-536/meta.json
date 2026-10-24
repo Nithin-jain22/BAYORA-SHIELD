@@ -1,0 +1,29 @@
+{
+  "report_id": "BS-20261022-153355-536",
+  "generated_at": 1792663435.536352,
+  "generated_at_iso": "2026-10-22T10:03:55+00:00",
+  "generated_at_local": "2026-10-22T15:33:55+05:30",
+  "scope": "all",
+  "session_id": null,
+  "evidence_id": null,
+  "generated_by": "system",
+  "summary": {
+    "total_attacks": 0,
+    "confirmed_bypasses": 0,
+    "defended": 0,
+    "inconclusive": 0,
+    "bypass_rate": 0.0,
+    "defence_rate": 0.0,
+    "retests": 0,
+    "findings_released": 8,
+    "findings_fixed": 0,
+    "findings_still_vulnerable": 0
+  },
+  "pdf_error": null,
+  "formats": [
+    "json",
+    "md",
+    "html",
+    "pdf"
+  ]
+}

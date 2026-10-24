@@ -1,0 +1,33 @@
+# Bayora-Shield — isolated Model Sandbox
+#
+# Runs the client LLM inside a locked-down container. This is the same
+# container the platform's Docker sandbox backend launches automatically when a
+# Docker daemon is reachable.
+#
+#   docker compose -f docker/docker-compose.yml up -d
+#
+# The container publishes the model only on host loopback (127.0.0.1:11435).
+# Start it if you want the Model Sandbox to be visible in `docker ps`; the app
+# otherwise falls back to a process-based sandbox with identical behaviour.
+
+services:
+  model-sandbox:
+    image: ollama/ollama:latest
+    container_name: bayora-shield-llm
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    # qwen3:8b needs ~5 GB resident; 4g made the kernel OOM-kill llama-server.
+    mem_limit: 6g
+    cpus: 6
+    pids_limit: 512
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - ${HOME}/.ollama:/root/.ollama
+    ports:
+      - "127.0.0.1:11435:11434"
+    command: ["serve"]
