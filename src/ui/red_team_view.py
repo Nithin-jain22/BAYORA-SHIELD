@@ -3,6 +3,7 @@
 import streamlit as st
 
 from ..core.attacks import ATTACKS, ATTACK_TYPES, EVASIVE_ATTACKS
+from ..core.tinyfish import harvest_live_jailbreak
 from ..core.timeutil import display_local
 from ..orchestration.red_team import RedTeamSession
 from .components import outcome_pill, render_layer_trace
@@ -104,6 +105,31 @@ def _render_message(attack) -> None:
             render_layer_trace(attack.layer_trace)
 
 
+
+def _render_tinyfish_harvester(session: RedTeamSession) -> None:
+    with st.expander("🐟 TinyFish Web Agent — Live Threat Harvester", expanded=True):
+        st.caption(
+            "Autonomous Web Agent scours live threat intelligence repositories and extracts emerging zero-day jailbreaks."
+        )
+        col1, col2 = st.columns([4, 1])
+        with col1:
+            target_url = st.text_input(
+                "Target Threat Intelligence URL",
+                value="https://github.com/verazuo/jailbreak_llms",
+                key="tf_target_url",
+            )
+        with col2:
+            st.write("")
+            st.write("")
+            harvest_btn = st.button("🎣 Ingest & Run", key="btn_tinyfish_harvest", width="stretch")
+
+        if harvest_btn:
+            with st.spinner("TinyFish Web Agent navigating live web and extracting novel payload…"):
+                payload = harvest_live_jailbreak(target_url=target_url)
+                st.success(f"Harvested: **{payload["name"]}** ({payload.get("source", "Web Agent")})")
+                _submit(session, payload["prompt"], payload["name"], payload.get("category", "Zero-Day Jailbreak"))
+
+
 def render() -> None:
     st.header("🔴 Red Team Workspace")
     st.caption("Attack the client LLM. Every bypass is released to the blue team as sanitised evidence.")
@@ -115,6 +141,7 @@ def render() -> None:
     session: RedTeamSession = st.session_state.red_session
     _render_metrics(session)
     _render_examples(session)
+    _render_tinyfish_harvester(session)
 
     with st.sidebar:
         st.markdown("---")
