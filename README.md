@@ -139,7 +139,7 @@ BAYORA-SHIELD/
 ### 1. Clone the Repository
 
 ```bash
-git clone [https://github.com/Nithin-jain22/BOYARA-SHIELD.git](https://github.com/Nithin-jain22/BOYARA-SHIELD.git)
+git clone https://github.com/Nithin-jain22/BOYARA-SHIELD.git
 cd BOYARA-SHIELD
 
 ```
