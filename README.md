@@ -223,10 +223,10 @@ These checks help validate audit integrity, network restrictions, and applicatio
 | Threat Vector | Addressed By | Residual Risk & Planned Roadmap |
 |---|---|---|
 | Premature payload leakage | Isolated workspaces; blind retests; Model Gateway mediation | Internal control plane tampering (Roadmap: Multi-party cryptographic signing) |
-| Policy reverse engineering | Blind testing and restricted evidence | Statistical inference across repeated runs |
-| Session contamination | Context resets and ephemeral sessions | Persistent runtime or model-server state |
-| Audit tampering | SHA-256 hash chaining | A privileged attacker could rewrite the entire chain |
-| Container escape | Restricted capabilities and non-root execution | Host-kernel vulnerabilities |
+| Defensive Reverse-Engineering | Sanitized evidence release; defensive rules decoupled from Red view | Black-box behavioral inference over many runs (Roadmap: Rate limits & randomized fuzzing) |
+| Session contamination | Ephemeral session IDs; explicit memory/context reset per test | Persistent KV-cache exploits (Roadmap: MicroVM recreation per run) |
+| Audit Log tampering | SHA-256 hash chaining | Privileged root attacker rewriting entire chain (Roadmap: External append-only ledger anchoring) |
+| Container escape | Docker --cap-drop ALL, non-root user, --security-opt no-new-privileges | Shared host-kernel vulnerabilities (Roadmap: Transition from Docker to Firecracker microVMs) |
 
 **Security note:** Docker provides useful isolation but is not equivalent to a separate virtual machine. Hash chaining detects inconsistent modifications but does not prevent full-chain rewriting without an independently protected integrity anchor.
 
