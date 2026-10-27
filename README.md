@@ -1,241 +1,226 @@
-# 🛡️ Bayora-Shield
+# BAYORA-SHIELD
+### Secure Adversarial AI Safety Testing & Evaluation Infrastructure
 
-**Secure adversarial AI testing infrastructure**
+**Secure the environment. Trust the evaluation.**
 
-> Secure the environment. Trust the evaluation.
+BAYORA-SHIELD is a security-first platform for adversarial LLM safety evaluation. It focuses on **evaluation integrity** by isolating Red Team and Blue Team environments, preventing premature attack-payload disclosure, controlling model interactions, and maintaining a tamper-evident audit trail.
 
-Bayora-Shield tests whether a local LLM's safety defences can be bypassed — and,
-just as importantly, whether the *environment* that produces those findings can
-be trusted. A red team attacks the model, confirmed bypasses are released to a
-blue team as **sanitised evidence**, and the blue team hardens the defences and
-**retests** to verify each fix.
+The platform combines multi-layer defenses, sandboxed local model execution, autonomous threat intelligence ingestion, sanitized evidence sharing, and cryptographically linked audit logs to support trustworthy AI safety testing.
 
-The primary interface is a React application served by a FastAPI control plane.
-The original Streamlit interface is retained as a legacy fallback.
+## Key Features
 
----
+- **Red Team / Blue Team Isolation:** Separates adversarial testing from defensive remediation and restricts attack-payload exposure.
+- **Live Threat Intelligence:** Integrates the [TinyFish Web Agent](https://agent.tinyfish.ai/) to ingest emerging adversarial test cases, with cached fallbacks for offline use.
+- **Multi-Layer Defense:** Combines rule-based filtering, ML classification, gateway enforcement, and output sanitization.
+- **Model Sandbox:** Supports local LLM inference through Ollama with Docker-based runtime isolation.
+- **Sanitized Evidence:** Shares behavioral signals and relevant failure evidence with defenders without unnecessarily exposing original attack payloads.
+- **Tamper-Evident Auditing:** Uses SHA-256 hash chaining to detect unauthorized modifications to audit records.
+- **Interactive Dashboard:** Provides Streamlit and React interfaces for testing, remediation, evaluation, reporting, and security auditing.
 
-## The workflow
-
-```
-Red Team                     Control Plane                 Blue Team
-─────────                    ─────────────                 ─────────
-attack prompt ──► L1 rules ──► L2 ML ──► L3 hardened ──► L4 output filter
-                                                │
-                             response assessment
-                                   │
-                    ┌──────────────┼──────────────┐
-                    │              │              │
-                 blocked        refused        complied
-                 filtered       uncertain      (only this is
-                    │              │           a bypass)
-                defence win    review only         │
-                                                   ▼
-                                      sanitised evidence released
-                                                   │
-                                            analyse → fix → retest
-                                                   │
-                                      verdict: FIXED / STILL VULNERABLE
-```
-
-### Outcome semantics
-
-| Outcome | Meaning | Counts as |
-| --- | --- | --- |
-| `blocked` | L1 rules or L2 classifier stopped the prompt | Defended |
-| `filtered` | L4 output filter replaced a leaking response | Defended |
-| `refused` | The model itself declined / stayed on policy | Defended |
-| `complied` | Response assessment confirmed a real bypass | **Finding** |
-| `uncertain` | No clear refusal or compliance; manual review | Inconclusive |
-| `safe_completion` | Benign prompt received a normal answer | Inconclusive / no signal |
-| `empty` / `error` | No usable response or gateway failure | Inconclusive |
-
-Only `complied` releases evidence and increments the bypass rate. Refusals are
-never mislabelled as bypasses. Every bypass view shows the actual model response
-that constituted the failure.
-
-* **Red team** sees the model response and its own history. It never sees blue
-  team analysis or defence internals.
-* **Blue team** never sees the raw attack prompt — only masked evidence,
-  behavioural signals, the layers that were cleared, and the model's failure
-  output. Retests replay the withheld payload through the control plane.
-* **Sandbox repair** gives the blue team an explicit manual restoration
-  workspace for the environment itself: runtime, container isolation, network
-  scope, gateway state, audit chain, defence store and runtime artifacts.
-* Every action is written to a **SHA-256 hash-chained audit log**. Destructive
-  repairs require confirmation and create quarantine backups.
-
----
-
-## Project layout
+## Architecture
 
 ```text
-.
-├── app.py                        # legacy Streamlit entry point
+       ┌────────────────────────┐
+       │ TinyFish Web Agent     │
+       │ Threat Intelligence    │
+       └───────────┬────────────┘
+                   ▼
+┌─────────────┐  ┌──────────────────────┐
+│  RED TEAM   │─▶️│     CONTROL PLANE    │
+│ Attack Sets │  │ L1: Rule Filter      │
+│ Custom Tests│  │ L2: ML Classifier    │
+└─────────────┘  │ L3: Model Gateway    │
+                 └──────────┬───────────┘
+                            ▼
+                 ┌──────────────────────┐
+                 │    MODEL SANDBOX     │
+                 │ Ollama / Llama 3.2   │
+                 │ Ephemeral Sessions   │
+                 └──────────┬───────────┘
+                            ▼
+                 ┌──────────────────────┐
+                 │  EVALUATION PLANE    │
+                 │ L4: Output Guard     │
+                 │ Response Assessor    │
+                 └──────────┬───────────┘
+                            ▼
+              ┌─────────────┴─────────────┐
+              ▼                           ▼
+     ┌─────────────────┐       ┌──────────────────┐
+     │   BLUE TEAM     │       │  SECURITY PLANE  │
+     │ Sanitized       │       │ SHA-256 Audit    │
+     │ Evidence        │       │ Chain & Verifier │
+     └─────────────────┘       └──────────────────┘
+```
+
+## Defense Pipeline
+
+| Layer | Component | Purpose |
+|---|---|---|
+| L1 | Rule-Based Filter | Regex checks, known jailbreak signatures, heuristic sanitization, and deny-list scanning. |
+| L2 | ML Classifier | Detects suspicious intent, instruction overrides, persona framing, and authority exploits. |
+| L3 | Model Gateway | Enforces authentication, rate limits, circuit breakers, and session controls. |
+| L4 | Output Guard | Detects and sanitizes sensitive output and unauthorized instruction disclosure. |
+
+## Evaluation Outcomes
+
+| Outcome | Meaning |
+|---|---|
+| `blocked` | Request stopped by L1 or L2. |
+| `filtered` | Output sanitized by L4. |
+| `refused` | Model refused the adversarial instruction. |
+| `complied` | Assessor identified a potential safety failure. |
+| `uncertain` | Result requires manual review. |
+| `error` | Gateway or runtime failure. |
+
+These outcomes distinguish model safety behavior from infrastructure enforcement and evaluation failures.
+
+## Technology Stack
+
+- **Backend:** Python, FastAPI, Streamlit
+- **Frontend:** React, TypeScript, Tailwind CSS
+- **Model Runtime:** Ollama, Llama 3.2 1B
+- **Isolation:** Docker
+- **Threat Intelligence:** TinyFish Web Agent
+- **Audit Logging:** SHA-256, JSONL
+- **Testing:** Pytest and shell-based security tests
+
+## Project Structure
+
+```text
+BAYORA-SHIELD/
+├── app.py
 ├── scripts/
-│   ├── start.sh                  # build React + serve everything on :8000
-│   └── dev.sh                    # FastAPI :8000 + Vite HMR :5173
+│   ├── start.sh
+│   ├── dev.sh
+│   ├── test_network_isolation.sh
+│   └── tamper_audit_demo.sh
 ├── frontend/
 │   └── src/
-│       ├── pages/                # Overview, Red, Blue, Repair, Evaluation, Reports, Audit
-│       ├── components/           # layout, primitives, charts, layer trace
-│       └── lib/                  # API client, timestamps, outcome metadata
+│       ├── pages/
+│       └── components/
 ├── docker/
-│   └── docker-compose.yml        # optional isolated Model Sandbox container
-├── data/runtime/                 # audit log, attack journal, evidence, reports, quarantine
+│   └── docker-compose.yml
+├── data/
+│   ├── attacks/
+│   └── runtime/
 ├── src/
-│   ├── api/server.py             # FastAPI endpoints + static React serving
-│   ├── config.py                 # paths / ports / model
+│   ├── api/server.py
+│   ├── config.py
 │   ├── core/
-│   │   ├── defense.py            # L1 rule filter
-│   │   ├── ml_classifier.py      # L2 classifier
-│   │   ├── llm.py                # L3 hardened system prompt
-│   │   ├── output_filter.py      # L4 output filter
-│   │   ├── response_assessor.py  # refusal / compliance / uncertain verdicts
-│   │   ├── conditions.py         # exact prompt-condition fingerprints
-│   │   ├── updater.py            # persisted continuous defence updates
-│   │   └── attacks.py            # curated obvious + evasive payloads
 │   ├── infrastructure/
-│   │   ├── sandbox.py            # Docker + process sandbox
-│   │   ├── sandbox_health.py     # per-layer health checks + audited repairs
-│   │   ├── gateway.py            # rate limit + circuit breaker
-│   │   └── security_plane.py     # tamper-evident audit log
 │   └── orchestration/
-│       ├── pipeline.py           # shared attack/retest pipeline
-│       ├── journal.py            # append-only attack-condition journal
-│       ├── control_plane.py      # isolation + remediation workflow
-│       ├── red_team.py
-│       ├── blue_team.py
-│       ├── evidence.py           # evidence sanitisation
-│       ├── evaluation_plane.py   # versioned runs and trend metrics
-│       └── reporting.py          # JSON / Markdown / HTML / PDF reports
 └── tests/
 ```
 
----
+## Getting Started
 
-## Requirements
+### Prerequisites
 
-* Python 3.10+
-* Node.js 18+ and npm (for the React frontend)
-* [Ollama](https://ollama.com) running locally with the client model:
-  ```bash
-  ollama pull qwen3:8b
-  ```
-* Docker is **optional**. When a Docker daemon is not running, the platform
-  automatically uses a process sandbox. When Docker is available, start the
-  sandbox to use the isolated container backend.
+- Python 3.10+
+- Git
+- [Ollama](https://ollama.com/)
+- Docker Desktop or Docker Engine (for sandboxed execution)
+- Node.js 18+ (for the React frontend)
+- TinyFish API key (optional)
 
-## Run
+### 1. Clone the Repository
 
 ```bash
+git clone https://github.com/Nithin-jain22/BOYARA-SHIELD.git
+cd BOYARA-SHIELD
+```
+
+### 2. Set Up Python
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
 pip install -r requirements.txt
-./scripts/start.sh
 ```
 
-The launcher installs frontend dependencies if needed, builds the React app, and
-serves it with FastAPI:
-
-* Application: <http://127.0.0.1:8000>
-* API docs: <http://127.0.0.1:8000/docs>
-
-Then click **Start sandbox** in the sidebar and use the workspaces:
-
-1. **Command center** — posture, attack trends, outcome mix, correlated bypass
-   conditions, audit-chain status and recent verdicts.
-2. **Red team** — fire curated or custom attacks, run the evasive set, and read
-   the model response, assessment and per-layer trace for every attempt.
-3. **Blue team** — analyse sanitised findings, apply L1/L2/L4 fixes and retest.
-   A vulnerable retest shows the actual model response as evidence.
-4. **Sandbox repair** — inspect every isolation layer and run explicit,
-   audited repairs. Destructive actions are confirmed and backed up.
-5. **Evaluation** — snapshot a session or the journal and compare versioned runs.
-6. **Reports** — generate and download JSON, Markdown, printable HTML or PDF.
-7. **Security audit** — explore the hash-chained event log in local time with
-   canonical UTC timestamps preserved.
-
-### Development mode
+### 3. Pull the Evaluation Model
 
 ```bash
-./scripts/dev.sh
+ollama pull llama3.2:1b
 ```
 
-This starts FastAPI on `:8000` and Vite with hot module replacement on `:5173`.
+The model can be configured in `src/config.py`, provided the selected model is supported by the runtime.
 
-### Legacy Streamlit interface
+### 4. Configure TinyFish (Optional)
+
+```bash
+export TINYFISH_API_KEY="your_tinyfish_api_key_here"
+```
+
+Cached payloads can be used for offline demonstrations where supported.
+
+## Running the Application
+
+**Streamlit console**
 
 ```bash
 streamlit run app.py
 ```
 
-The legacy app shares the same pipeline, evidence queue, attack journal and audit
-log. It is useful as a fallback but does not include the new React report and
-repair experience.
+Open [http://localhost:8501](http://localhost:8501).
+
+**Full-stack application**
+
+```bash
+./scripts/start.sh
+```
+
+- Application: [http://127.0.0.1:8000](http://127.0.0.1:8000)
+- API documentation: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+
+For development with frontend hot reloading:
+
+```bash
+./scripts/dev.sh
+```
+
+## Security Verification
+
+**Audit integrity**
+
+```bash
+bash scripts/tamper_audit_demo.sh
+```
+
+Run the audit-chain verification in the application before and after the demonstration. The script intentionally modifies audit data, so use a disposable test environment.
+
+**Network isolation**
+
+```bash
+bash scripts/test_network_isolation.sh
+```
+
+**Automated tests**
+
+```bash
+pytest -q
+```
+
+These checks help validate audit integrity, network restrictions, and application behavior. Actual security guarantees depend on the implementation and deployment configuration.
+
+## Threat Model
+
+| Threat | Mitigation | Residual Risk |
+|---|---|---|
+| Premature payload leakage | Workspace separation and sanitized evidence | Privileged access or control-plane compromise |
+| Policy reverse engineering | Blind testing and restricted evidence | Statistical inference across repeated runs |
+| Session contamination | Context resets and ephemeral sessions | Persistent runtime or model-server state |
+| Audit tampering | SHA-256 hash chaining | A privileged attacker could rewrite the entire chain |
+| Container escape | Restricted capabilities and non-root execution | Host-kernel vulnerabilities |
+
+**Security note:** Docker provides useful isolation but is not equivalent to a separate virtual machine. Hash chaining detects inconsistent modifications but does not prevent full-chain rewriting without an independently protected integrity anchor.
+
+## License
+
+Licensed under the **Apache License 2.0**. See [LICENSE](LICENSE) for details.
 
 ---
 
-## Timestamps
-
-Runtime timestamps are timezone-aware. APIs and reports carry both:
-
-* `timestamp_iso` — canonical UTC with `+00:00`
-* `timestamp_local` — the host's local offset
-
-The React UI renders local time and exposes the canonical UTC value on hover or
-in the audit-event detail dialog.
-
-## Reports
-
-Reports are stored under `data/runtime/reports/<report_id>/` in four formats:
-
-* `report.json` — complete machine-readable evidence package
-* `report.md` — human-readable audit narrative
-* `report.html` — self-contained, print-ready report
-* `report.pdf` — compact PDF generated with ReportLab
-
-Reports mask raw payload text to preserve red/blue isolation. Exact fingerprints,
-structural conditions, layer traces, timestamps, response assessments and the
-model response that proved each bypass are preserved. Remediation history,
-sandbox health and audit-chain status are included.
-
-## Optional: run the isolated Model Sandbox in Docker
-
-```bash
-docker compose -f docker/docker-compose.yml up -d
-docker ps   # bayora-shield-llm should now be listed
-```
-
-The app detects the Docker daemon automatically and prefers the container backend
-when it is available. The container reuses the host `~/.ollama` model store, so
-`qwen3:8b` does not need to be downloaded twice. It is capped at 6 GB / 6 CPUs
-(raise Docker Desktop's VM memory above 6 GB, or the model load may be
-OOM-killed).
-
-If isolation flags drift, the **Sandbox repair** workspace can recreate the
-container, validate the defence store, reset the gateway, quarantine runtime
-artifacts and re-verify the audit chain.
-
-## Tests
-
-```bash
-python3 tests/test_core.py
-python3 tests/test_app_smoke.py
-cd frontend && npm run build
-```
-
-The core tests cover refusal-versus-bypass classification, timestamp handling,
-benign short responses, journal breach fields and all report formats. The smoke
-test renders every Streamlit workspace.
-
-## Command line
-
-```bash
-python -m src.core.simulator    # run all example attacks through the layers
-```
-
-## Notes on isolation
-
-The process sandbox isolates the model process, binds it to a dedicated loopback
-port and reuses the host model store. The Docker backend adds a read-only
-filesystem, dropped capabilities and memory/CPU/PID limits. Full network egress
-denial requires host firewall rules and is listed as future work.
+**BAYORA-SHIELD — Secure the environment. Trust the evaluation.**
