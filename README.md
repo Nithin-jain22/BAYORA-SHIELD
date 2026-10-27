@@ -77,40 +77,52 @@ These outcomes distinguish model safety behavior from infrastructure enforcement
 
 ## Technology Stack
 
-- **Backend:** Python, FastAPI, Streamlit
+- **Backend:** Python 3.10+, FastAPI, Streamlit
 - **Frontend:** React, TypeScript, Tailwind CSS
 - **Model Runtime:** Ollama, Llama 3.2 1B
 - **Isolation:** Docker
-- **Threat Intelligence:** TinyFish Web Agent
-- **Audit Logging:** SHA-256, JSONL
-- **Testing:** Pytest and shell-based security tests
+- **Threat Intelligence:** TinyFish Autonomous Web Agent
+- **Audit Logging:** SHA-256 Cryptographic Hash Chain, JSONL
+- **Testing:** Pytest, shell-based security tests
 
 ## Project Structure
 
 ```text
 BAYORA-SHIELD/
-├── app.py
+├── app.py                             # Interactive Streamlit application
 ├── scripts/
-│   ├── start.sh
-│   ├── dev.sh
-│   ├── test_network_isolation.sh
-│   └── tamper_audit_demo.sh
-├── frontend/
+│   ├── start.sh                       # Build React app + launch FastAPI on :8000
+│   ├── dev.sh                         # FastAPI (:8000) + Vite HMR (:5173) dev stack
+│   ├── test_network_isolation.sh      # Docker network segmentation verification
+│   └── tamper_audit_demo.sh           # Demonstrates hash-chain break on record mutation
+├── frontend/                          # React + TypeScript + Tailwind UI
 │   └── src/
-│       ├── pages/
-│       └── components/
+│       ├── pages/                     # Command Center, Red, Blue, Repair, Evaluation, Reports, Audit
+│       └── components/                # Layer traces, charts, metrics cards
 ├── docker/
-│   └── docker-compose.yml
+│   └── docker-compose.yml             # Isolated container definitions
 ├── data/
-│   ├── attacks/
-│   └── runtime/
+│   ├── attacks/                       # Curated baseline attack dataset
+│   └── runtime/                       # Cryptographic audit logs, reports, and quarantine backups
 ├── src/
-│   ├── api/server.py
-│   ├── config.py
+│   ├── api/server.py                  # FastAPI REST endpoints
+│   ├── config.py                      # Active model configuration and system ports
 │   ├── core/
+│   │   ├── tinyfish.py                # TinyFish Autonomous Web Agent client
+│   │   ├── defense.py                 # L1 regex and pattern filters
+│   │   ├── ml_classifier.py           # L2 semantic vector classifier
+│   │   ├── llm.py                     # L3 client model gateway caller
+│   │   ├── output_filter.py           # L4 response sanitizer
+│   │   ├── response_assessor.py       # Semantic compliance & refusal detector
+│   │   └── timeutil.py                # Timezone-aware local host timestamp manager
 │   ├── infrastructure/
-│   └── orchestration/
-└── tests/
+│   │   ├── sandbox.py                 # Docker runtime manager & process jail
+│   │   ├── sandbox_health.py          # Isolation health inspector
+│   │   ├── gateway.py                 # Policy gateway, authentication, and rate limits
+│   │   └── security_plane.py          # Cryptographic audit logger & hash-chain verifier
+│   └── orchestration/                 # Pipelines, red/blue workflows, evidence sanitization
+└── tests/                             # Unit, smoke, and regression tests
+
 ```
 
 ## Getting Started
