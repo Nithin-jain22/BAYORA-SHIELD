@@ -196,7 +196,7 @@ For development with frontend hot reloading:
 
 ## Security Verification
 
-**Audit integrity**
+**1. Tamper-Evident Audit Verification**
 
 ```bash
 bash scripts/tamper_audit_demo.sh
@@ -204,13 +204,13 @@ bash scripts/tamper_audit_demo.sh
 
 Run the audit-chain verification in the application before and after the demonstration. The script intentionally modifies audit data, so use a disposable test environment.
 
-**Network isolation**
+**2. Network Isolation Test**
 
 ```bash
 bash scripts/test_network_isolation.sh
 ```
 
-**Automated tests**
+**3. Automated Test Suite**
 
 ```bash
 pytest -q
