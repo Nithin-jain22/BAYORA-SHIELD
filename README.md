@@ -26,7 +26,7 @@ The platform combines multi-layer defenses, sandboxed local model execution, aut
        └───────────┬────────────┘
                    ▼
 ┌─────────────┐  ┌──────────────────────┐
-│  RED TEAM   │─▶️│     CONTROL PLANE    │
+│  RED TEAM   │─►│     CONTROL PLANE    │
 │ Attack Sets │  │ L1: Rule Filter      │
 │ Custom Tests│  │ L2: ML Classifier    │
 └─────────────┘  │ L3: Model Gateway    │
