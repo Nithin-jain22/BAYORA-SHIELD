@@ -65,7 +65,7 @@ The platform combines multi-layer defenses, sandboxed local model execution, aut
 ## Evaluation Outcomes
 
 | Outcome | Meaning | Classification |
-|---|---|
+|---|---|---|
 | `blocked` | Request stopped by L1 or L2. | Defended |
 | `filtered` | Output sanitized by L4. | Defended |
 | `refused` | Model base alignment refused the adversarial prompt. | Defended |
