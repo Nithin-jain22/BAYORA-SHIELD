@@ -218,11 +218,11 @@ pytest -q
 
 These checks help validate audit integrity, network restrictions, and application behavior. Actual security guarantees depend on the implementation and deployment configuration.
 
-## Threat Model
+## Threat Model & Residual Risks
 
-| Threat | Mitigation | Residual Risk |
+| Threat Vector | Addressed By | Residual Risk & Planned Roadmap |
 |---|---|---|
-| Premature payload leakage | Workspace separation and sanitized evidence | Privileged access or control-plane compromise |
+| Premature payload leakage | Isolated workspaces; blind retests; Model Gateway mediation | Internal control plane tampering (Roadmap: Multi-party cryptographic signing) |
 | Policy reverse engineering | Blind testing and restricted evidence | Statistical inference across repeated runs |
 | Session contamination | Context resets and ephemeral sessions | Persistent runtime or model-server state |
 | Audit tampering | SHA-256 hash chaining | A privileged attacker could rewrite the entire chain |
